@@ -59,16 +59,24 @@ case "$TYPE" in
   ;;
 esac
 
-echo "Configuring Job Manager on this node:"
-cat "$CONF"
-
 CMD="${EXEC} start cluster"
 echo "${CMD}"
 
-trap "${EXEC} stop cluster;exit 0" SIGINT SIGTERM 15 9 10
+trap "${EXEC} stop cluster; exit 1" SIGINT SIGTERM 15 9 10
 ${CMD}
 
-sleep 1
+# Sleep long enough to let Flink create the log files
+while [ ! -f $FLINK_HOME/log/flink-*.log ]; do
+  sleep 1
+done
 
-# now make this thing run in the foreground
-tail -s 5 -F "$FLINK_HOME/log/flink-*.log"
+# Pipe Flink output to stdout
+tail -10000 -f $FLINK_HOME/log/flink-*.log &
+tail -10000 -f $FLINK_HOME/log/flink-*.out &
+
+# Wait for Flink process to terminate...
+PID=$(cat $PID_FILE)
+while [[ ( -d /proc/$PID ) && ( -z $(grep zombie /proc/$PID/status) ) ]]; do
+    sleep 1
+done
+
