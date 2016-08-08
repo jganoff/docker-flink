@@ -22,6 +22,7 @@ ADD scripts/start-flink.sh /usr/bin/
 ADD scripts/supervise-flink.sh /usr/bin/
 ADD supervisor-jobmanager.ini /etc/supervisor.d/
 ADD supervisor-taskmanager.ini /etc/supervisor.d/
+ADD scripts/kill-supervisor.py /usr/bin/
 
 VOLUME /tmp/flink $FLINK_HOME/conf
 
