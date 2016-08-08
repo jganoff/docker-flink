@@ -22,8 +22,8 @@ function edit_properties() {
 
   # replace if found, append if not
   grep "^\\s*\($KEY\)" "$CONF" > /dev/null \
-    && sed -i "s/^\\s*\($KEY\)\\s*:\(.*\)$/\1: $VALUE/" "$FILE" \
-    || echo "$RAW_KEY: $RAW_VALUE" >> "$FILE"
+    && sed -i "s/^\\s*\($KEY\)\\s*:\(.*\)$/\1: $VALUE/" "$CONF" \
+    || echo "$RAW_KEY: $RAW_VALUE" >> "$CONF"
 }
 
 edit_properties 'jobmanager.heap.mb' '256'
