@@ -14,4 +14,8 @@ case "$FLINK_MANAGER_TYPE" in
     ;;
 esac
 
-supervisord -n -c "/etc/supervisor.d/$CONFIG"
+# Execute supervisord instead of calling it directly so the current process
+# (the shell running this script) is replaced by supervisord and it receives
+# all signals directly from Docker.
+exec supervisord -n -c "/etc/supervisor.d/$CONFIG"
+
