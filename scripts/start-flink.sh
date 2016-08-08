@@ -2,6 +2,13 @@
 
 TYPE="$1"
 
+FLINK_JOBMANAGER_RPC_ADDRESS=${FLINK_JOBMANAGER_RPC_ADDRESS:-localhost}
+FLINK_JOBMANAGER_RPC_PORT=${FLINK_JOBMANAGER_RPC_PORT:-6123}
+FLINK_HEAP_MB=${FLINK_HEAP_MB:-256}
+FLINK_NUM_TASK_SLOTS=${FLINK_NUM_TASK_SLOTS:-1}
+FLINK_TMP_DIRS=${FLINK_TMP_DIRS:-/tmp/flink}
+FLINK_JOBMANAGER_WEB_HISTORY=${FLINK_JOBMANAGER_WEB_HISTORY:-20}
+
 CONF="$FLINK_HOME/conf/flink-conf.yaml"
 EXEC="$FLINK_HOME/bin/${TYPE}.sh"
 
@@ -26,26 +33,25 @@ function edit_properties() {
     || echo "$RAW_KEY: $RAW_VALUE" >> "$CONF"
 }
 
-edit_properties 'jobmanager.heap.mb' '256'
-edit_properties 'taskmanager.heap.mb' '512'
-edit_properties 'taskmanager.numberOfTaskSlots' '4'
+edit_properties 'jobmanager.heap.mb' $FLINK_HEAP_MB
+edit_properties 'taskmanager.heap.mb' $FLINK_HEAP_MB
+edit_properties 'taskmanager.numberOfTaskSlots' $FLINK_NUM_TASK_SLOTS
 edit_properties 'taskmanager.memory.preallocate' 'false'
 edit_properties 'parallelism.default' '1'
-edit_properties 'taskmanager.tmp.dirs' '/tmp/flink'
+edit_properties 'taskmanager.tmp.dirs' $FLINK_TMP_DIRS
 edit_properties 'env.pid.dir' '/var/run'
-edit_properties 'jobmanager.web.history' '20'
+edit_properties 'jobmanager.web.history' $FLINK_JOBMANAGER_WEB_HISTORY
+edit_properties 'jobmanager.rpc.address' $FLINK_JOBMANAGER_RPC_ADDRESS
+edit_properties 'jobmanager.rpc.port' $FLINK_JOBMANAGER_RPC_PORT
 
 case "$TYPE" in
   "jobmanager" )
     echo "Starting Flink Job Manager"
-    edit_properties 'jobmanager.rpc.address' "${HOSTNAME:-localhost}"
-    edit_properties 'jobmanager.rpc.port' '6123'
+    PID_FILE=/var/run/flink--jobmanager.pid
   ;;
   "taskmanager" )
     echo "Starting Flink Task Manager"
-    # port + address env vars come from docker links
-    edit_properties 'jobmanager.rpc.address' "${FLINK_JOBMANAGER_PORT_6123_TCP_ADDR:-flinkjobmanager}"
-    edit_properties 'jobmanager.rpc.port' "${FLINK_JOBMANAGER_PORT_6123_TCP_PORT:-6123}"
+    PID_FILE=/var/run/flink--taskmanager.pid
   ;;
   * )
     echo "Invalid type: $TYPE, exiting!"
