@@ -18,7 +18,6 @@ RUN wget -q -O - $(wget -q -O - "http://www.apache.org/dyn/closer.cgi?as_json=1"
     mv /opt/flink-$FLINK_VERSION $FLINK_HOME
 
 COPY conf/* $FLINK_HOME/conf/
-RUN rm $FLINK_HOME/conf/log4j.properties
 ADD scripts/start-flink.sh /usr/bin/
 ADD scripts/supervise-flink.sh /usr/bin/
 ADD supervisor-jobmanager.ini /etc/supervisor.d/
