@@ -7,7 +7,7 @@ ARG HADOOP_VERSION=27
 ENV FLINK_HOME /opt/flink
 ENV PATH $PATH:$FLINK_HOME/bin
 
-RUN mkdir /opt
+RUN mkdir /opt && mkdir /flink
 
 # Dependencies
 RUN apk add --no-cache supervisor bash jq
